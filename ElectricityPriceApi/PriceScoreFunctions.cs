@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace ElectricityPriceApi
 {
-    public static class PriceScoreToday
+    public static class PriceScoreFunctions
     {
         [FunctionName("PriceScoreToday")]
         public static async Task<IActionResult> RunPriceScoreToday(
