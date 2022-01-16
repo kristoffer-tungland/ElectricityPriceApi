@@ -1,30 +1,49 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using ElectricityPriceApi.Examples;
+using ElectricityPriceApi.Extensions;
+using ElectricityPriceApi.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
+using Microsoft.OpenApi.Models;
 
 namespace ElectricityPriceApi
 {
-    public static class PriceScoreFunctions
+    public class PriceScoreFunctions
     {
-        [FunctionName("PriceScoreToday")]
-        public static async Task<IActionResult> RunPriceScoreToday(
+        private readonly PriceScoreService _priceScoreService;
+
+        public PriceScoreFunctions(PriceScoreService priceScoreService)
+        {
+            _priceScoreService = priceScoreService;
+        }
+
+        [FunctionName("PriceScore")]
+        [OpenApiOperation("RunPriceScore", "name", Description = "Description of the function")]
+        [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
+        [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunPriceScore(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            var hour = int.TryParse(req.Query["hour"], out var result) ? result : DateTime.Now.Hour;
-
             try
             {
-                var score = PriceObject.GetScore(hour);
+                var date = DateTime.Parse(req.Query["date"]);
+
+                if (int.TryParse(req.Query["hour"], out var hour))
+                    date = date.SetHour(hour);
+
+                var score = await _priceScoreService.GetScore(date);
                 return new OkObjectResult(score);
             }
             catch (Exception e)
@@ -33,19 +52,83 @@ namespace ElectricityPriceApi
             }
         }
 
-        [FunctionName("PriceScoreTomorrow")]
-        public static async Task<IActionResult> RunPriceScoreTomorrow(
+        [FunctionName("PriceScoreToday")]
+        [OpenApiOperation("RunPriceScoreToday", "name", Description = "Description of the function")]
+        [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunPriceScoreToday(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            var hour = int.TryParse(req.Query["hour"], out var result) ? result : DateTime.Now.Hour;
+            try
+            {
+                var date = DateExtensions.Today;
+
+                if (int.TryParse(req.Query["hour"], out var hour))
+                    date = date.SetHour(hour);
+
+                var score = await _priceScoreService.GetScore(date);
+                return new OkObjectResult(score);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestResult();
+            }
+        }
+
+
+        [FunctionName("PriceScoreTomorrow")]
+        [OpenApiOperation("RunPriceScoreTomorrow", "name", Description = "Description of the function")]
+        [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunPriceScoreTomorrow(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
 
             try
             {
-                var score = PriceObject.GetScore(hour);
+                var date = DateExtensions.Tomorrow;
+
+                if (int.TryParse(req.Query["hour"], out var hour))
+                    date = date.SetHour(hour);
+
+                var score = _priceScoreService.GetScore(date);
                 return new OkObjectResult(score);
+            }
+            catch (Exception e)
+            {
+                return new BadRequestResult();
+            }
+        }
+
+        [FunctionName("HourOfPriceScore")]
+        [OpenApiOperation("RunHourOfPriceScore", "name", Description = "Description of the function")]
+        [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to to use, for example 2022-01-16")]
+        [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunHourOfPriceScore(
+            [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+            ILogger log)
+        {
+            log.LogInformation("C# HTTP trigger function processed a request.");
+
+            if (!DateTime.TryParse(req.Query["date"], out var date))
+                return new BadRequestErrorMessageResult("Date was not on correct format");
+
+            if (!int.TryParse(req.Query["score"], out var score))
+                return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+
+            try
+            {
+                var hour = await _priceScoreService.GetHour(date, score);
+                return new OkObjectResult(hour);
             }
             catch (Exception e)
             {
@@ -54,19 +137,22 @@ namespace ElectricityPriceApi
         }
 
         [FunctionName("HourOfPriceScoreToday")]
-        public static async Task<IActionResult> RunHourOfPriceScoreToday(
+        [OpenApiOperation("RunHourOfPriceScoreToday", "name", Description = "Description of the function")]
+        [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunHourOfPriceScoreToday(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            int? score = int.TryParse(req.Query["score"], out var result) ? result : null;
-
-            if (score is null)
+            if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+
             try
             {
-                var hour = PriceObject.GetHour((int)score);
+                var hour = await _priceScoreService.GetHour(DateTime.Today, score);
                 return new OkObjectResult(hour);
             }
             catch (Exception e)
@@ -76,78 +162,28 @@ namespace ElectricityPriceApi
         }
 
         [FunctionName("HourOfPriceScoreTomorrow")]
-        public static async Task<IActionResult> RunHourOfPriceScoreTomorrow(
+        [OpenApiOperation("RunHourOfPriceScoreTomorrow", "name", Description = "Description of the function")]
+        [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
+        [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
+        public async Task<IActionResult> RunHourOfPriceScoreTomorrow(
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
-            int? score = int.TryParse(req.Query["score"], out var result) ? result : null;
-
-            if (score is null)
+            if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+
             try
             {
-                var hour = PriceObject.GetHour((int)score);
+                var hour = await _priceScoreService.GetHour(DateTime.Today.AddDays(1), score);
                 return new OkObjectResult(hour);
             }
             catch (Exception e)
             {
                 return new BadRequestResult();
             }
-        }
-    }
-
-    public static class PriceObject
-    {
-        public static Dictionary<int, float> Prices { get; } = CreateDesignData();
-
-        private static Dictionary<int, float> CreateDesignData()
-        {
-            var random = new Random();
-            var result = new Dictionary<int, float>();
-
-            for (var i = 1; i <= 24; i++)
-            {
-                var randomNumber = random.Next(0, 24);
-
-                result.Add(i, randomNumber);
-            }
-
-            return result;
-        }
-
-        public static int GetScore(int hour)
-        {
-            if (Prices.TryGetValue(hour, out var value))
-            {
-                var orderedList = Prices.OrderBy(x => x.Value).ToList();
-
-                var pair = orderedList.First(x => x.Key == hour);
-
-                var index = orderedList.IndexOf(pair);
-
-                return index + 1;
-            }
-
-            throw new Exception($"Could not get score from hour {hour}");
-
-        }
-
-        public static int GetHour(int score)
-        {
-            var key = score - 1;
-
-            var orderedList = Prices.OrderBy(x => x.Value).ToList();
-
-            if (orderedList.Count >= key)
-            {
-                var pair = orderedList[key];
-                
-                return pair.Key;
-            }
-
-            throw new Exception($"Could not get hour from score {score}");
         }
     }
 }
