@@ -5,15 +5,15 @@ using System.Web.Http;
 using ElectricityPriceApi.Examples;
 using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.Services;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
 
-namespace ElectricityPriceApi
+namespace ElectricityPriceApi.Functions
 {
     public class PriceScoreFunctions
     {
