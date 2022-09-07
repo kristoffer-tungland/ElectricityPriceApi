@@ -1,0 +1,19 @@
+{
+  "dependencies": {
+    "storage1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.Storage/storageAccounts/ellagroupdiag",
+      "type": "storage.azure",
+      "connectionId": "AzureWebJobsStorage"
+    },
+    "apis1": {
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.ApiManagement/service/ElectricityPriceApiapi/apis/ElectricityPriceApi",
+      "type": "apis.azure"
+    },
+    "secrets1": {
+      "secretStore": "AzureAppSettings",
+      "resourceId": "/subscriptions/[parameters('subscriptionId')]/resourceGroups/[parameters('resourceGroupName')]/providers/Microsoft.KeyVault/vaults/ElectricityPriceApiVault",
+      "type": "secrets.keyVault",
+      "connectionId": "AzureKeyVaultEndpoint"
+    }
+  }
+}

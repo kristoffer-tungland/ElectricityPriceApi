@@ -1,7 +1,9 @@
 using System;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
+using ElectricityPriceApi.Enums;
 using ElectricityPriceApi.Examples;
 using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.Services;
@@ -26,6 +28,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("PriceScore")]
         [OpenApiOperation("RunPriceScore", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
@@ -38,12 +41,13 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var date = DateTime.Parse(req.Query["date"]);
+                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+                var date = DateTime.Parse(req.Query["date"], CultureInfo.InvariantCulture);
+                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
-                if (int.TryParse(req.Query["hour"], out var hour))
-                    date = date.SetHour(hour);
+                var localTime = dateTime.ToLocalTime(area);
 
-                var score = await _priceScoreService.GetScore(date);
+                var score = await _priceScoreService.GetScore(localTime, area);
                 return new OkObjectResult(score);
             }
             catch (Exception e)
@@ -54,6 +58,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("PriceScoreToday")]
         [OpenApiOperation("RunPriceScoreToday", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
@@ -65,12 +70,13 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
+                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
                 var date = DateExtensions.Today;
+                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
-                if (int.TryParse(req.Query["hour"], out var hour))
-                    date = date.SetHour(hour);
+                var localTime = dateTime.ToLocalTime(area);
 
-                var score = await _priceScoreService.GetScore(date);
+                var score = await _priceScoreService.GetScore(localTime, area);
                 return new OkObjectResult(score);
             }
             catch (Exception e)
@@ -82,6 +88,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("PriceScoreTomorrow")]
         [OpenApiOperation("RunPriceScoreTomorrow", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
@@ -93,12 +100,13 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
+                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
                 var date = DateExtensions.Tomorrow;
+                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
-                if (int.TryParse(req.Query["hour"], out var hour))
-                    date = date.SetHour(hour);
+                var localTime = dateTime.ToLocalTime(area);
 
-                var score = _priceScoreService.GetScore(date);
+                var score = await _priceScoreService.GetScore(localTime, area);
                 return new OkObjectResult(score);
             }
             catch (Exception e)

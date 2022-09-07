@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Reflection;
-using Azure.Identity;
-using Azure.Security.KeyVault.Secrets;
 using ElectricityPriceApi;
+using ElectricityPriceApi.Configuration;
+using ElectricityPriceApi.HttpClients;
 using ElectricityPriceApi.Services;
+using ElectricityPriceApi.Services.Prices;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
-using Microsoft.Azure.KeyVault;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json.Converters;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -17,7 +18,18 @@ public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
+        builder.Services.AddMvcCore().AddNewtonsoftJson(x =>
+        {
+            x.SerializerSettings.Converters.Add(new StringEnumConverter());
+        });
+
+        builder.Services.AddHttpClient();
+        builder.Services.AddTransient<PriceHttpClient>();
+        builder.Services.AddTransient<EntsoeHttpClient>();
+
+
         builder.Services.AddScoped<PriceScoreService>();
+        builder.Services.AddScoped<IPriceService, PriceService>();
 
         builder.Services.AddOptions<MyConfiguration>()
             .Configure<IConfiguration>((settings, configuration) =>
@@ -30,6 +42,20 @@ public class Startup : FunctionsStartup
             {
                 configuration.GetSection("MyConfigurationSecrets").Bind(settings);
             });
+
+        
+        builder.Services.AddOptions<CosmosConfiguration>()
+            .Configure<IConfiguration>((settings, configuration) =>
+            {
+                configuration.GetSection("Cosmos").Bind(settings);
+            });
+
+        builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
+        
+
+        builder.Services.AddSingleton<PriceRepository>();
+
+
     }
 
     public override void ConfigureAppConfiguration(IFunctionsConfigurationBuilder builder)
@@ -60,9 +86,12 @@ public class Startup : FunctionsStartup
     }
 }
 
+
 public class MyConfigurationSecrets
 {
-    public string ServiceApiKey { get; set; }
+    public string? ServiceApiKey { get; set; }
+    public string? PriceApiKey { get; set; }
+    public string? EntsoeApiKey { get; set; }
 }
 
 public class MyConfiguration
