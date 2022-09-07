@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Models;
 using ElectricityPriceApi.Services.Prices;
 using Microsoft.Extensions.Options;
 
@@ -55,10 +54,37 @@ public class PriceScoreService
 
     }
 
-    public async Task<int> GetHour(DateTime date, int score)
+    public async Task<int> GetHour(DateTime dateTime, int score, Area area)
     {
-        await Task.Delay(0);
+        var periodStart = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
+        var periodEnd = periodStart.AddHours(24);
 
-        return PriceObject.GetHour(date, score);
+        var args = new GetHourPricesArgs(area, periodStart, periodEnd);
+        try
+        {
+            var hourPricesResult = await _priceService.GetHourPrices(args);
+            return GetHour(score, (hourPricesResult.Prices ?? throw new InvalidOperationException()).ToDictionary(x => x.StartTime.Hour, x => x.PriceAmount));
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            throw;
+        }
+    }
+
+    public static int GetHour(int score, Dictionary<int, float> hourPrices)
+    {
+        var key = score - 1;
+
+        var orderedList = hourPrices.OrderBy(x => x.Value).ToList();
+
+        if (orderedList.Count >= key)
+        {
+            var pair = orderedList[key];
+
+            return pair.Key;
+        }
+
+        throw new Exception($"Could not get hour from score {score}");
     }
 }

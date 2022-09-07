@@ -117,6 +117,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("HourOfPriceScore")]
         [OpenApiOperation("RunHourOfPriceScore", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to to use, for example 2022-01-16")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
@@ -127,6 +128,8 @@ namespace ElectricityPriceApi.Functions
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
+            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+
             if (!DateTime.TryParse(req.Query["date"], out var date))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
@@ -135,7 +138,7 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var hour = await _priceScoreService.GetHour(date, score);
+                var hour = await _priceScoreService.GetHour(date, score, area);
                 return new OkObjectResult(hour);
             }
             catch (Exception e)
@@ -146,6 +149,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("HourOfPriceScoreToday")]
         [OpenApiOperation("RunHourOfPriceScoreToday", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
@@ -155,12 +159,14 @@ namespace ElectricityPriceApi.Functions
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
+            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+
             if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
 
             try
             {
-                var hour = await _priceScoreService.GetHour(DateTime.Today, score);
+                var hour = await _priceScoreService.GetHour(DateTime.Today, score, area);
                 return new OkObjectResult(hour);
             }
             catch (Exception e)
@@ -171,6 +177,7 @@ namespace ElectricityPriceApi.Functions
 
         [FunctionName("HourOfPriceScoreTomorrow")]
         [OpenApiOperation("RunHourOfPriceScoreTomorrow", "name", Description = "Description of the function")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
@@ -180,12 +187,14 @@ namespace ElectricityPriceApi.Functions
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
+            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+
             if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
 
             try
             {
-                var hour = await _priceScoreService.GetHour(DateTime.Today.AddDays(1), score);
+                var hour = await _priceScoreService.GetHour(DateExtensions.Tomorrow, score, area);
                 return new OkObjectResult(hour);
             }
             catch (Exception e)
