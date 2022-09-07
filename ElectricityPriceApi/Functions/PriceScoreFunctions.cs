@@ -37,12 +37,14 @@ namespace ElectricityPriceApi.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
+
+            if (!DateTime.TryParse(req.Query["date"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+                return new BadRequestErrorMessageResult("Date was not on correct format");
 
             try
             {
-                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
-                var date = DateTime.Parse(req.Query["date"], CultureInfo.InvariantCulture);
                 var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
                 var localTime = dateTime.ToLocalTime(area);
@@ -52,6 +54,7 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get price score");
                 return new BadRequestResult();
             }
         }
@@ -66,11 +69,11 @@ namespace ElectricityPriceApi.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
             try
             {
-                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
                 var date = DateExtensions.Today;
                 var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
@@ -81,6 +84,7 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get price score today");
                 return new BadRequestResult();
             }
         }
@@ -98,9 +102,11 @@ namespace ElectricityPriceApi.Functions
         {
             log.LogInformation("C# HTTP trigger function processed a request.");
 
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
+
             try
             {
-                var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
                 var date = DateExtensions.Tomorrow;
                 var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
 
@@ -111,6 +117,7 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get price score tomorrow");
                 return new BadRequestResult();
             }
         }
@@ -126,15 +133,14 @@ namespace ElectricityPriceApi.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
             if (!DateTime.TryParse(req.Query["date"], out var date))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
             if (!int.TryParse(req.Query["score"], out var score))
-                return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+                return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
             try
             {
@@ -143,13 +149,14 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get hour of price score");
                 return new BadRequestResult();
             }
         }
 
         [FunctionName("HourOfPriceScoreToday")]
         [OpenApiOperation("RunHourOfPriceScoreToday", "name", Description = "Description of the function")]
-        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
+        [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example no2")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
@@ -157,12 +164,11 @@ namespace ElectricityPriceApi.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
             if (!int.TryParse(req.Query["score"], out var score))
-                return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+                return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
             try
             {
@@ -171,6 +177,7 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get hour of price score today");
                 return new BadRequestResult();
             }
         }
@@ -185,12 +192,11 @@ namespace ElectricityPriceApi.Functions
             [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
             ILogger log)
         {
-            log.LogInformation("C# HTTP trigger function processed a request.");
-
-            var area = Enum.TryParse(req.Query["area"], out Area res) ? res : Area.No2;
+            if (!Enum.TryParse(req.Query["area"], true, out Area area))
+                return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
             if (!int.TryParse(req.Query["score"], out var score))
-                return new BadRequestErrorMessageResult("Please supply score to request, example ?score=1");
+                return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
             try
             {
@@ -199,6 +205,7 @@ namespace ElectricityPriceApi.Functions
             }
             catch (Exception e)
             {
+                log.LogError(e, "Failed to get hour of price score tomorrow");
                 return new BadRequestResult();
             }
         }
