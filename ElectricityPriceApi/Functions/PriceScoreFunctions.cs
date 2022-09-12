@@ -49,7 +49,9 @@ namespace ElectricityPriceApi.Functions
 
                 var localTime = dateTime.ToLocalTime(area);
 
-                var result = await _priceScoreService.GetScore(localTime, area);
+                var args = new GetScoreArgs(localTime, area);
+                var result = await _priceScoreService.GetScore(args);
+
                 return new OkObjectResult(result);
             }
             catch (Exception e)
@@ -79,8 +81,10 @@ namespace ElectricityPriceApi.Functions
 
                 var localTime = dateTime.ToLocalTime(area);
 
-                var score = await _priceScoreService.GetScore(localTime, area);
-                return new OkObjectResult(score);
+                var args = new GetScoreArgs(localTime, area);
+                var result = await _priceScoreService.GetScore(args);
+
+                return new OkObjectResult(result);
             }
             catch (Exception e)
             {
@@ -112,8 +116,10 @@ namespace ElectricityPriceApi.Functions
 
                 var localTime = dateTime.ToLocalTime(area);
 
-                var score = await _priceScoreService.GetScore(localTime, area);
-                return new OkObjectResult(score);
+                var args = new GetScoreArgs(localTime, area);
+                var result = await _priceScoreService.GetScore(args);
+
+                return new OkObjectResult(result);
             }
             catch (Exception e)
             {

@@ -1,15 +1,18 @@
-﻿using ElectricityPriceApi.Services.Prices;
+﻿using System.Collections.Generic;
+using ElectricityPriceApi.Models;
 
 namespace ElectricityPriceApi.Services.Scores;
 
 public class GetScoreResult
 {
-    public GetScoreResult(int score, GetHourPricesResult hourPricesResult)
+    public GetScoreResult(int score, int hour, List<HourPriceScore> prices)
     {
         Score = score;
-        HourPricesResult = hourPricesResult;
+        Hour = hour;
+        Prices = prices;
     }
 
     public int Score { get; }
-    public GetHourPricesResult HourPricesResult { get; }
+    public int Hour { get; }
+    public List<HourPriceScore> Prices { get; }
 }

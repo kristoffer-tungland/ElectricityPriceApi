@@ -20,11 +20,11 @@ namespace ElectricityPriceApi.Functions
 {
     public class PriceFunctions
     {
-        private readonly IPriceService _PriceService;
+        private readonly IPriceService _priceService;
 
-        public PriceFunctions(IPriceService PriceService)
+        public PriceFunctions(IPriceService priceService)
         {
-            _PriceService = PriceService;
+            _priceService = priceService;
         }
 
         [FunctionName("Price")]
@@ -51,7 +51,7 @@ namespace ElectricityPriceApi.Functions
             {
                 var args = new GetHourPricesArgs(area, fromDate, toDate);
 
-                var hourPrices = await _PriceService.GetHourPrices(args);
+                var hourPrices = await _priceService.GetHourPrices(args);
                 return new OkObjectResult(hourPrices);
             }
             catch (Exception e)
