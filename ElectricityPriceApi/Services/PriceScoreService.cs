@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ElectricityPriceApi.Enums;
 using ElectricityPriceApi.Services.Prices;
+using ElectricityPriceApi.Services.Scores;
 using Microsoft.Extensions.Options;
 
 namespace ElectricityPriceApi.Services;
@@ -18,7 +19,7 @@ public class PriceScoreService
         _priceService = priceService;
     }
 
-    public async Task<int> GetScore(DateTimeOffset dateTime, Area area)
+    public async Task<GetScoreResult> GetScore(DateTimeOffset dateTime, Area area)
     {
         var periodStart = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
         var periodEnd = periodStart.AddHours(24);
@@ -28,13 +29,30 @@ public class PriceScoreService
         {
             var hourPricesResult = await _priceService.GetHourPrices(args);
             var hour = dateTime.ToLocalTime().Hour;
-            return GetScore(hour, (hourPricesResult.Prices ?? throw new InvalidOperationException()).ToDictionary(x => x.StartTime.Hour, x => x.PriceAmount));
+            //var score = GetScore(hour, (hourPricesResult.Prices ?? throw new InvalidOperationException()).ToDictionary(x => x.Time.Hour, x => x.Price));
+            var score = GetScore(hour, hourPricesResult.Prices);
+
+            return new GetScoreResult(score, hourPricesResult);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
             throw;
         }
+    }
+
+    public static int GetScore(int hour, List<Models.HourPrice>? hourPrices)
+    {
+        if (hourPrices is null)
+            throw new Exception("Prices was null");
+
+        var orderedList = hourPrices.OrderBy(x => x.Price).ToList();
+
+        var price = orderedList.First(x => x.Time.Hour == hour);
+
+        var index = orderedList.IndexOf(price);
+
+        return index + 1;
     }
 
     public static int GetScore(int hour, Dictionary<int, float> hourPrices)
@@ -63,7 +81,7 @@ public class PriceScoreService
         try
         {
             var hourPricesResult = await _priceService.GetHourPrices(args);
-            return GetHour(score, (hourPricesResult.Prices ?? throw new InvalidOperationException()).ToDictionary(x => x.StartTime.Hour, x => x.PriceAmount));
+            return GetHour(score, (hourPricesResult.Prices ?? throw new InvalidOperationException()).ToDictionary(x => x.Time.Hour, x => x.Price));
         }
         catch (Exception e)
         {

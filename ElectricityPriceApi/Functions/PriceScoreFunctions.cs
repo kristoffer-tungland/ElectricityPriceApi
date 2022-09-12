@@ -49,13 +49,13 @@ namespace ElectricityPriceApi.Functions
 
                 var localTime = dateTime.ToLocalTime(area);
 
-                var score = await _priceScoreService.GetScore(localTime, area);
-                return new OkObjectResult(score);
+                var result = await _priceScoreService.GetScore(localTime, area);
+                return new OkObjectResult(result);
             }
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get price score");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
 
@@ -85,7 +85,7 @@ namespace ElectricityPriceApi.Functions
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get price score today");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
 
@@ -118,7 +118,7 @@ namespace ElectricityPriceApi.Functions
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get price score tomorrow");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
 
@@ -150,7 +150,7 @@ namespace ElectricityPriceApi.Functions
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get hour of price score");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
 
@@ -178,7 +178,7 @@ namespace ElectricityPriceApi.Functions
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get hour of price score today");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
 
@@ -206,7 +206,7 @@ namespace ElectricityPriceApi.Functions
             catch (Exception e)
             {
                 log.LogError(e, "Failed to get hour of price score tomorrow");
-                return new BadRequestResult();
+                return new ExceptionResult(e, true);
             }
         }
     }

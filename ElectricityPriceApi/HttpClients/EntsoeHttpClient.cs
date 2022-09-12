@@ -82,8 +82,8 @@ namespace ElectricityPriceApi.HttpClients
 
             return new HourPrice
             {
-                PriceAmount = (float)point.PriceAmount / 1000,
-                StartTime = localTime
+                Price = (float)point.PriceAmount / 1000,
+                Time = localTime
             };
         }
     }
