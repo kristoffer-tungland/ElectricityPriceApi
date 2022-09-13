@@ -8,6 +8,7 @@ using ElectricityPriceApi.Services.Prices;
 using Microsoft.Azure.Functions.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
 [assembly: FunctionsStartup(typeof(Startup))]
@@ -29,6 +30,7 @@ public class Startup : FunctionsStartup
 
 
         builder.Services.AddScoped<PriceScoreService>();
+        builder.Services.AddSingleton(new JsonSerializerSettings { Formatting = Formatting.Indented });
         builder.Services.AddScoped<IPriceService, PriceService>();
 
         builder.Services.AddOptions<MyConfiguration>()

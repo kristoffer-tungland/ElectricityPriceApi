@@ -18,4 +18,16 @@ public static class DateExtensions
         var timeZone = area.ToTimeZone();
         return new DateTimeOffset(dateTime, timeZone.GetUtcOffset(dateTime));
     }
+
+    public static DateTime ConvertTimeFromUtc(this DateTime utcTime, Area area)
+    {
+        var timeZone = area.ToTimeZone();
+        return TimeZoneInfo.ConvertTimeFromUtc(utcTime, timeZone);
+    }
+
+    public static DateTime ConvertTimeToUtc(this DateTime utcTime, Area area)
+    {
+        var timeZone = area.ToTimeZone();
+        return TimeZoneInfo.ConvertTimeToUtc(utcTime, timeZone);
+    }
 }

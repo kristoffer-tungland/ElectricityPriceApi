@@ -5,7 +5,7 @@ namespace ElectricityPriceApi.Services.Prices;
 
 public class GetHourPricesArgs
 {
-    public GetHourPricesArgs(Area area, DateTimeOffset periodStart, DateTimeOffset periodEnd)
+    public GetHourPricesArgs(Area area, DateTime periodStart, DateTime periodEnd)
     {
         Area = area;
         PeriodStart = periodStart;
@@ -13,6 +13,6 @@ public class GetHourPricesArgs
     }
 
     public Area Area { get; }
-    public DateTimeOffset PeriodStart { get; }
-    public DateTimeOffset PeriodEnd { get; }
+    public DateTime PeriodStart { get; }
+    public DateTime PeriodEnd { get; }
 }

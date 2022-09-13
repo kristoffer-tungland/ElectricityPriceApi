@@ -4,8 +4,6 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Web.Http;
 using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Examples;
-using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.Services;
 using ElectricityPriceApi.Services.Prices;
 using Microsoft.AspNetCore.Http;
@@ -15,16 +13,19 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace ElectricityPriceApi.Functions
 {
     public class PriceFunctions
     {
         private readonly IPriceService _priceService;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public PriceFunctions(IPriceService priceService)
+        public PriceFunctions(IPriceService priceService, JsonSerializerSettings jsonSerializerSettings)
         {
             _priceService = priceService;
+            _jsonSerializerSettings = jsonSerializerSettings;
         }
 
         [FunctionName("Price")]
@@ -41,18 +42,18 @@ namespace ElectricityPriceApi.Functions
             if (!Enum.TryParse(req.Query["area"], true, out Area area))
                 return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
-            if (!DateTimeOffset.TryParse(req.Query["fromDate"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var fromDate))
+            if (!DateTime.TryParse(req.Query["fromDate"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var fromDate))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
-            if (!DateTimeOffset.TryParse(req.Query["toDate"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var toDate))
+            if (!DateTime.TryParse(req.Query["toDate"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var toDate))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
             try
             {
                 var args = new GetHourPricesArgs(area, fromDate, toDate);
 
-                var hourPrices = await _priceService.GetHourPrices(args);
-                return new OkObjectResult(hourPrices);
+                var result = await _priceService.GetHourPrices(args);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {

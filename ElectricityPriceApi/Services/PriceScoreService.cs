@@ -24,9 +24,8 @@ public class PriceScoreService
     public async Task<GetScoreResult> GetScore(GetScoreArgs args)
     {
         var area = args.Area;
-        var timeZone = area.ToTimeZone();
         var localTime = args.LocalTime;
-        var periodStart = new DateTimeOffset(localTime.Year, localTime.Month, localTime.Day, 0, 0, 0, timeZone.GetUtcOffset(localTime));
+        var periodStart = new DateTime(localTime.Year, localTime.Month, localTime.Day);
         var periodEnd = periodStart.AddHours(24);
 
         var getHourPricesArgs = new GetHourPricesArgs(area, periodStart, periodEnd);
@@ -77,7 +76,7 @@ public class PriceScoreService
 
         var hourPriceScore = pricesWithScore.First(x => x.Score == score);
 
-        var hour = hourPriceScore.Time.ToLocalTime().Hour;
+        var hour = hourPriceScore.Time.Hour;
 
         return new GetHourResult(hour, score, pricesWithScore);
     }

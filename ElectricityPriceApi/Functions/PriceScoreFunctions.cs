@@ -14,16 +14,19 @@ using Microsoft.Azure.WebJobs.Extensions.Http;
 using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
 using Microsoft.Extensions.Logging;
 using Microsoft.OpenApi.Models;
+using Newtonsoft.Json;
 
 namespace ElectricityPriceApi.Functions
 {
     public class PriceScoreFunctions
     {
         private readonly PriceScoreService _priceScoreService;
+        private readonly JsonSerializerSettings _jsonSerializerSettings;
 
-        public PriceScoreFunctions(PriceScoreService priceScoreService)
+        public PriceScoreFunctions(PriceScoreService priceScoreService, JsonSerializerSettings jsonSerializerSettings)
         {
             _priceScoreService = priceScoreService;
+            _jsonSerializerSettings = jsonSerializerSettings;
         }
 
         [FunctionName("PriceScore")]
@@ -45,14 +48,11 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
-
-                var localTime = dateTime.ToLocalTime(area);
-
+                var localTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.CurrentLocalHour());
+                
                 var args = new GetScoreArgs(localTime, area);
                 var result = await _priceScoreService.GetScore(args);
-
-                return new OkObjectResult(result);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {
@@ -76,15 +76,15 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var date = DateExtensions.Today;
-                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
+                var localTime = area.LocalTimeNow();
 
-                var localTime = dateTime.ToLocalTime(area);
+                if (int.TryParse(req.Query["hour"], out var hour))
+                    localTime = localTime.SetHour(hour);
 
                 var args = new GetScoreArgs(localTime, area);
                 var result = await _priceScoreService.GetScore(args);
 
-                return new OkObjectResult(result);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {
@@ -111,15 +111,15 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var date = DateExtensions.Tomorrow;
-                var dateTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.GetCurrentLocalHour());
+                var localTime = area.LocalTimeNow().AddDays(1);
 
-                var localTime = dateTime.ToLocalTime(area);
+                if (int.TryParse(req.Query["hour"], out var hour))
+                    localTime = localTime.SetHour(hour);
 
                 var args = new GetScoreArgs(localTime, area);
                 var result = await _priceScoreService.GetScore(args);
 
-                return new OkObjectResult(result);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {
@@ -142,7 +142,7 @@ namespace ElectricityPriceApi.Functions
             if (!Enum.TryParse(req.Query["area"], true, out Area area))
                 return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
-            if (!DateTime.TryParse(req.Query["date"], out var date))
+            if (!DateTime.TryParse(req.Query["date"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
             if (!int.TryParse(req.Query["score"], out var score))
@@ -150,8 +150,8 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var hour = await _priceScoreService.GetHour(date, score, area);
-                return new OkObjectResult(hour);
+                var result = await _priceScoreService.GetHour(date, score, area);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {
@@ -178,8 +178,10 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var hour = await _priceScoreService.GetHour(DateTime.Today, score, area);
-                return new OkObjectResult(hour);
+                var localTime = area.LocalTimeNow();
+
+                var result = await _priceScoreService.GetHour(localTime, score, area);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {
@@ -206,8 +208,10 @@ namespace ElectricityPriceApi.Functions
 
             try
             {
-                var hour = await _priceScoreService.GetHour(DateExtensions.Tomorrow, score, area);
-                return new OkObjectResult(hour);
+                var localTime = area.LocalTimeNow().AddDays(1);
+
+                var result = await _priceScoreService.GetHour(localTime, score, area);
+                return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
             {

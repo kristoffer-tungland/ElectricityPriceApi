@@ -5,14 +5,14 @@ namespace ElectricityPriceApi.Services.Scores;
 
 public class GetScoreResult
 {
-    public GetScoreResult(int score, int hour, List<HourPriceScore> prices)
+    public GetScoreResult(int scoreNow, int hour, List<HourPriceScore> prices)
     {
-        Score = score;
+        ScoreNow = scoreNow;
         Hour = hour;
         Prices = prices;
     }
 
-    public int Score { get; }
+    public int ScoreNow { get; }
     public int Hour { get; }
     public List<HourPriceScore> Prices { get; }
 }

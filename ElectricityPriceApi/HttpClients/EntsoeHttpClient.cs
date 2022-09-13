@@ -32,11 +32,12 @@ public class EntsoeHttpClient
 
     public async Task<GetHourPricesResult> GetHourPrices(GetHourPricesArgs args)
     {
-        var inDomain = args.Area.ConvertToDomain();
-        var outDomain = args.Area.ConvertToDomain();
+        var area = args.Area;
+        var inDomain = area.ConvertToDomain();
+        var outDomain = area.ConvertToDomain();
 
-        var periodStart = args.PeriodStart.ToUniversalTime();
-        var periodEnd = args.PeriodEnd.ToUniversalTime();
+        var periodStart = args.PeriodStart.ConvertTimeToUtc(area);
+        var periodEnd = args.PeriodEnd.ConvertTimeToUtc(area);
 
         var httpRequestMessage = new HttpRequestMessage(
             HttpMethod.Get, $"https://transparency.entsoe.eu/api?documentType=A44&in_Domain={inDomain}&out_Domain={outDomain}&periodStart={periodStart.ToString(Format)}&periodEnd={periodEnd.ToString(Format)}&securityToken={_apiKey}");
@@ -78,7 +79,7 @@ public class EntsoeHttpClient
     {
         var startTime = timeIntervalStart.AddHours(point.Position - 1);
         var utcTime = DateTime.Parse(startTime.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
-        var localTime = utcTime.ToLocalTime();
+        var localTime = utcTime.ConvertTimeFromUtc(area);
 
         return new HourPrice
         {

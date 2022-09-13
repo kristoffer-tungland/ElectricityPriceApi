@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Globalization;
 using ElectricityPriceApi.Enums;
 
 namespace ElectricityPriceApi.Extensions;
@@ -17,12 +16,19 @@ public static class AreaExtensions
         return TimeZoneInfo.FindSystemTimeZoneById(timeZoneId);
     }
 
-    public static int GetCurrentLocalHour(this Area area)
+    public static DateTime LocalTimeNow(this Area area)
     {
         var utcNow = DateTime.UtcNow;
-        var dateTime = DateTime.Parse(utcNow.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
-        var timeZone = area.ToTimeZone();
-        var dateTimeOffset = new DateTimeOffset(dateTime, -timeZone.GetUtcOffset(dateTime));
-        return dateTimeOffset.UtcDateTime.Hour;
+        var localTime = utcNow.ConvertTimeFromUtc(area);
+
+        return localTime;
+    }
+
+    public static int CurrentLocalHour(this Area area)
+    {
+        var utcNow = DateTime.UtcNow;
+        var localTime = utcNow.ConvertTimeFromUtc(area);
+
+        return localTime.Hour;
     }
 }
