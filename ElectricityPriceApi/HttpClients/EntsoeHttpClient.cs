@@ -47,8 +47,8 @@ public class EntsoeHttpClient
 
         httpResponseMessage.EnsureSuccessStatusCode();
 
-        var xml =  await httpResponseMessage.Content.ReadAsStringAsync();
-            
+        var xml = await httpResponseMessage.Content.ReadAsStringAsync();
+
         xml = RemoveZInDates(xml);
 
         var serializer = new XmlSerializer(typeof(PublicationMarketDocument));
@@ -61,7 +61,8 @@ public class EntsoeHttpClient
 
         return new GetHourPricesResult
         {
-            Prices = publicationMarketDocument.TimeSeries.SelectMany(x => Flatten(x, args.Area)).ToList()
+            Prices = publicationMarketDocument.TimeSeries.SelectMany(x => Flatten(x, args.Area)).ToList(),
+            PriceUnit = $@"{publicationMarketDocument.TimeSeries.First().CurrencyUnitName}/kWh"
         };
     }
 
@@ -72,11 +73,13 @@ public class EntsoeHttpClient
 
     private static IEnumerable<HourPrice> Flatten(TimeSeries timeSeries, Area area)
     {
-        return timeSeries.Period.Point.Select(x => ConvertPointToHourPrice(x, timeSeries.Period.TimeInterval.Start, area)).ToList();
+        return timeSeries.Period.Point.Select(x => ConvertPointToHourPrice(x, timeSeries, area)).ToList();
     }
 
-    private static HourPrice ConvertPointToHourPrice(Point point, DateTime timeIntervalStart, Area area)
+    private static HourPrice ConvertPointToHourPrice(Point point, TimeSeries timeSeries, Area area)
     {
+        var timeIntervalStart = timeSeries.Period.TimeInterval.Start;
+
         var startTime = timeIntervalStart.AddHours(point.Position - 1);
         var utcTime = DateTime.Parse(startTime.ToString(CultureInfo.InvariantCulture), CultureInfo.InvariantCulture);
         var localTime = utcTime.ConvertTimeFromUtc(area);

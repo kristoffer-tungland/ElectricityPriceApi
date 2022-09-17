@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ElectricityPriceApi.Models;
+﻿using ElectricityPriceApi.Models;
 
 namespace ElectricityPriceApi.Services;
 
@@ -7,12 +6,14 @@ public class GetHourResult
 {
     public int Hour { get; }
     public int Score { get; }
-    public List<HourPriceScore> Prices { get; }
+    public float Price { get; }
+    public string? PriceUnit { get; set; }
 
-    public GetHourResult(int hour, int score, List<HourPriceScore> prices)
+    public GetHourResult(HourPriceScore hourPriceScore, string? priceUnit)
     {
-        Hour = hour;
-        Score = score;
-        Prices = prices;
+        Hour = hourPriceScore.Time.Hour;
+        Score = hourPriceScore.Score;
+        Price = hourPriceScore.Price;
+        PriceUnit = priceUnit;
     }
 }

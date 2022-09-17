@@ -40,9 +40,8 @@ public class PriceScoreService
         var hour = localTime.ToLocalTime().Hour;
 
         var hourPriceScore = pricesWithScore.First(x => x.Time.Hour == hour);
-        var score = hourPriceScore.Score;
 
-        return new GetScoreResult(score, hour, pricesWithScore);
+        return new GetScoreResult(hourPriceScore, pricesWithScore, hourPricesResult.PriceUnit);
     }
 
     public List<HourPriceScore> CalculateScoreOnPrices(List<HourPrice> prices)
@@ -76,24 +75,6 @@ public class PriceScoreService
 
         var hourPriceScore = pricesWithScore.First(x => x.Score == score);
 
-        var hour = hourPriceScore.Time.Hour;
-
-        return new GetHourResult(hour, score, pricesWithScore);
-    }
-
-    public static int GetHour(int score, Dictionary<int, float> hourPrices)
-    {
-        var key = score - 1;
-
-        var orderedList = hourPrices.OrderBy(x => x.Value).ToList();
-
-        if (orderedList.Count >= key)
-        {
-            var pair = orderedList[key];
-
-            return pair.Key;
-        }
-
-        throw new Exception($"Could not get hour from score {score}");
+        return new GetHourResult(hourPriceScore, hourPricesResult.PriceUnit);
     }
 }
