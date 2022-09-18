@@ -27,6 +27,7 @@ public class Startup : FunctionsStartup
         builder.Services.AddHttpClient();
         builder.Services.AddTransient<PriceHttpClient>();
         builder.Services.AddTransient<EntsoeHttpClient>();
+        builder.Services.AddTransient<NorskeBankHttpClient>();
 
 
         builder.Services.AddScoped<PriceScoreService>();
@@ -87,7 +88,6 @@ public class Startup : FunctionsStartup
         }
     }
 }
-
 
 public class MyConfigurationSecrets
 {

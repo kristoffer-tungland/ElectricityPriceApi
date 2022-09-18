@@ -33,6 +33,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("fromDate", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
         [OpenApiParameter("toDate", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive")]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunPrice(
@@ -48,9 +49,13 @@ namespace ElectricityPriceApi.Functions
             if (!DateTime.TryParse(req.Query["toDate"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var toDate))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
-                var args = new GetHourPricesArgs(area, fromDate, toDate);
+                var args = new GetHourPricesArgs(area, fromDate, toDate, currency);
 
                 var result = await _priceService.GetHourPrices(args);
                 return new JsonResult(result, _jsonSerializerSettings);

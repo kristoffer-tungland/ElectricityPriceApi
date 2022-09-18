@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.Models;
 using ElectricityPriceApi.Services.Prices;
 using ElectricityPriceApi.Services.Scores;
@@ -28,7 +26,7 @@ public class PriceScoreService
         var periodStart = new DateTime(localTime.Year, localTime.Month, localTime.Day);
         var periodEnd = periodStart.AddHours(24);
 
-        var getHourPricesArgs = new GetHourPricesArgs(area, periodStart, periodEnd);
+        var getHourPricesArgs = new GetHourPricesArgs(area, periodStart, periodEnd, args.Currency);
 
         var hourPricesResult = await _priceService.GetHourPrices(getHourPricesArgs);
 
@@ -41,7 +39,7 @@ public class PriceScoreService
 
         var hourPriceScore = pricesWithScore.First(x => x.Time.Hour == hour);
 
-        return new GetScoreResult(hourPriceScore, pricesWithScore, hourPricesResult.PriceUnit);
+        return new GetScoreResult(hourPriceScore, pricesWithScore, hourPricesResult.GetPriceUnit());
     }
 
     public List<HourPriceScore> CalculateScoreOnPrices(List<HourPrice> prices)
@@ -59,14 +57,18 @@ public class PriceScoreService
         return result;
     }
 
-    public async Task<GetHourResult> GetHour(DateTime dateTime, int score, Area area)
+    public async Task<GetHourResult> GetHour(GetHourArgs args)
     {
-        var periodStart = new DateTime(dateTime.Year, dateTime.Month, dateTime.Day);
+        var localTime = args.LocalTime;
+        var area = args.Area;
+        var score = args.Score;
+
+        var periodStart = new DateTime(localTime.Year, localTime.Month, localTime.Day);
         var periodEnd = periodStart.AddHours(24);
 
-        var args = new GetHourPricesArgs(area, periodStart, periodEnd);
+        var getHourPricesArgs = new GetHourPricesArgs(area, periodStart, periodEnd, args.Currency);
 
-        var hourPricesResult = await _priceService.GetHourPrices(args);
+        var hourPricesResult = await _priceService.GetHourPrices(getHourPricesArgs);
 
         if (hourPricesResult.Prices is null)
             throw new NullReferenceException(nameof(hourPricesResult));
@@ -75,6 +77,6 @@ public class PriceScoreService
 
         var hourPriceScore = pricesWithScore.First(x => x.Score == score);
 
-        return new GetHourResult(hourPriceScore, hourPricesResult.PriceUnit);
+        return new GetHourResult(hourPriceScore, hourPricesResult.GetPriceUnit());
     }
 }

@@ -34,6 +34,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunPriceScore(
@@ -46,11 +47,15 @@ namespace ElectricityPriceApi.Functions
             if (!DateTime.TryParse(req.Query["date"], CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
                 return new BadRequestErrorMessageResult("Date was not on correct format");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
                 var localTime = date.SetHour(int.TryParse(req.Query["hour"], out var hour) ? hour : area.CurrentLocalHour());
                 
-                var args = new GetScoreArgs(localTime, area);
+                var args = new GetScoreArgs(localTime, area, currency);
                 var result = await _priceScoreService.GetScore(args);
                 return new JsonResult(result, _jsonSerializerSettings);
             }
@@ -65,6 +70,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiOperation("RunPriceScoreToday", "name", Description = "Description of the function")]
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunPriceScoreToday(
@@ -74,6 +80,10 @@ namespace ElectricityPriceApi.Functions
             if (!Enum.TryParse(req.Query["area"], true, out Area area))
                 return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
                 var localTime = area.LocalTimeNow();
@@ -81,7 +91,7 @@ namespace ElectricityPriceApi.Functions
                 if (int.TryParse(req.Query["hour"], out var hour))
                     localTime = localTime.SetHour(hour);
 
-                var args = new GetScoreArgs(localTime, area);
+                var args = new GetScoreArgs(localTime, area, currency);
                 var result = await _priceScoreService.GetScore(args);
 
                 return new JsonResult(result, _jsonSerializerSettings);
@@ -98,6 +108,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiOperation("RunPriceScoreTomorrow", "name", Description = "Description of the function")]
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("hour", In = ParameterLocation.Query, Required = false, Type = typeof(int), Description = "The hour to get price score for, between 0-23, if blank use current hour")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunPriceScoreTomorrow(
@@ -109,6 +120,10 @@ namespace ElectricityPriceApi.Functions
             if (!Enum.TryParse(req.Query["area"], true, out Area area))
                 return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
                 var localTime = area.LocalTimeNow().AddDays(1);
@@ -116,7 +131,7 @@ namespace ElectricityPriceApi.Functions
                 if (int.TryParse(req.Query["hour"], out var hour))
                     localTime = localTime.SetHour(hour);
 
-                var args = new GetScoreArgs(localTime, area);
+                var args = new GetScoreArgs(localTime, area, currency);
                 var result = await _priceScoreService.GetScore(args);
 
                 return new JsonResult(result, _jsonSerializerSettings);
@@ -133,6 +148,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("date", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to to use, for example 2022-01-16")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunHourOfPriceScore(
@@ -148,9 +164,15 @@ namespace ElectricityPriceApi.Functions
             if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
-                var result = await _priceScoreService.GetHour(date, score, area);
+                var args = new GetHourArgs(date, score, area, currency);
+
+                var result = await _priceScoreService.GetHour(args);
                 return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
@@ -164,6 +186,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiOperation("RunHourOfPriceScoreToday", "name", Description = "Description of the function")]
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example no2")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunHourOfPriceScoreToday(
@@ -176,11 +199,17 @@ namespace ElectricityPriceApi.Functions
             if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
                 var localTime = area.LocalTimeNow();
 
-                var result = await _priceScoreService.GetHour(localTime, score, area);
+                var args = new GetHourArgs(localTime, score, area, currency);
+
+                var result = await _priceScoreService.GetHour(args);
                 return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)
@@ -194,6 +223,7 @@ namespace ElectricityPriceApi.Functions
         [OpenApiOperation("RunHourOfPriceScoreTomorrow", "name", Description = "Description of the function")]
         [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
         [OpenApiParameter("score", In = ParameterLocation.Query, Required = true, Type = typeof(int), Description = "The price score to get the hour for, between 1-24. 1 is cheapest and 24 is most expensive")]
+        [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
         [OpenApiResponseWithBody(HttpStatusCode.OK, "text/plain", typeof(int), Description = "Hour for the price score", Example = typeof(PriceScoreExample))]
         [OpenApiResponseWithoutBody(HttpStatusCode.BadRequest)]
         public async Task<IActionResult> RunHourOfPriceScoreTomorrow(
@@ -206,11 +236,17 @@ namespace ElectricityPriceApi.Functions
             if (!int.TryParse(req.Query["score"], out var score))
                 return new BadRequestErrorMessageResult("Please supply score to request, example score=1");
 
+            var currency = req.Query["currency"];
+            if (string.IsNullOrEmpty(currency))
+                currency = "EUR";
+
             try
             {
                 var localTime = area.LocalTimeNow().AddDays(1);
 
-                var result = await _priceScoreService.GetHour(localTime, score, area);
+                var args = new GetHourArgs(localTime, score, area, currency);
+
+                var result = await _priceScoreService.GetHour(args);
                 return new JsonResult(result, _jsonSerializerSettings);
             }
             catch (Exception e)

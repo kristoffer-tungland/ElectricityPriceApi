@@ -62,7 +62,8 @@ public class EntsoeHttpClient
         return new GetHourPricesResult
         {
             Prices = publicationMarketDocument.TimeSeries.SelectMany(x => Flatten(x, args.Area)).ToList(),
-            PriceUnit = $@"{publicationMarketDocument.TimeSeries.First().CurrencyUnitName}/kWh"
+            CurrencyUnitName = publicationMarketDocument.TimeSeries.First().CurrencyUnitName,
+            PriceMeasureUnitName = "kWh"
         };
     }
 
