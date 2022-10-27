@@ -5,6 +5,11 @@ namespace ElectricityPriceApi.Services.Scores;
 
 public class GetScoreResult
 {
+    public GetScoreResult()
+    {
+        
+    }
+
     public GetScoreResult(HourPriceScore hourPriceScore, List<HourPriceScore> pricesWithScore, string? priceUnit)
     {
         ScoreNow = hourPriceScore.Score;
@@ -19,10 +24,10 @@ public class GetScoreResult
         }
     }
     
-    public int ScoreNow { get; }
-    public int HourNow { get; }
+    public int ScoreNow { get; set; }
+    public int HourNow { get; set; }
     public float PriceNow { get; set; }
     public string? PriceUnit { get; set; }
-    public Dictionary<string, int> HourScores { get; } = new();
-    public Dictionary<string, float> HourPrices { get; } = new();
+    public SerializableDictionary<string, int> HourScores { get; set; } = new();
+    public SerializableDictionary<string, float> HourPrices { get; set; } = new();
 }

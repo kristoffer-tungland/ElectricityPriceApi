@@ -5,9 +5,11 @@ namespace ElectricityPriceApi.Services.Prices;
 
 public class GetHourPricesResult
 {
-    public List<HourPrice>? Prices { get; set; }
     public string? CurrencyUnitName { get; set; }
     public string? PriceMeasureUnitName { get; set; }
+
+    public List<HourPrice>? Prices { get; set; }
+    
 
     public string? GetPriceUnit()
     {

@@ -4,10 +4,15 @@ namespace ElectricityPriceApi.Services;
 
 public class GetHourResult
 {
-    public int Hour { get; }
-    public int Score { get; }
-    public float Price { get; }
+    public int Hour { get; set; }
+    public int Score { get; set; }
+    public float Price { get; set; }
     public string? PriceUnit { get; set; }
+
+    public GetHourResult()
+    {
+        
+    }
 
     public GetHourResult(HourPriceScore hourPriceScore, string? priceUnit)
     {

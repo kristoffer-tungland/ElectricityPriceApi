@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Buffers;
+using System.Net.Http.Formatting;
 using System.Reflection;
+using System.Text.Json;
 using ElectricityPriceApi;
 using ElectricityPriceApi.Configuration;
 using ElectricityPriceApi.HttpClients;
@@ -10,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
+using Microsoft.AspNetCore.Mvc.Formatters;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 
@@ -19,11 +23,22 @@ public class Startup : FunctionsStartup
 {
     public override void Configure(IFunctionsHostBuilder builder)
     {
-        builder.Services.AddMvcCore().AddNewtonsoftJson(x =>
-        {
-            x.SerializerSettings.Converters.Add(new StringEnumConverter());
-        });
-
+        builder.Services.AddMvcCore(options =>
+            {
+                var jsonSettings = new JsonSerializerSettings
+                {
+                    Formatting = Formatting.Indented
+                };
+                var json = new NewtonsoftJsonOutputFormatter(jsonSettings, ArrayPool<char>.Shared, options);
+                options.OutputFormatters.Add(json);
+                options.OutputFormatters.Add(new XmlSerializerOutputFormatter());
+            })
+            .AddNewtonsoftJson(options =>
+            {
+                options.SerializerSettings.Formatting = Formatting.Indented;
+                options.SerializerSettings.Converters.Add(new StringEnumConverter());
+            })
+            .AddXmlDataContractSerializerFormatters().AddXmlSerializerFormatters();
         builder.Services.AddHttpClient();
         builder.Services.AddTransient<PriceHttpClient>();
         builder.Services.AddTransient<EntsoeHttpClient>();
@@ -31,7 +46,6 @@ public class Startup : FunctionsStartup
 
 
         builder.Services.AddScoped<PriceScoreService>();
-        builder.Services.AddSingleton(new JsonSerializerSettings { Formatting = Formatting.Indented });
         builder.Services.AddScoped<IPriceService, PriceService>();
 
         builder.Services.AddOptions<MyConfiguration>()
@@ -46,7 +60,7 @@ public class Startup : FunctionsStartup
                 configuration.GetSection("MyConfigurationSecrets").Bind(settings);
             });
 
-        
+
         builder.Services.AddOptions<CosmosConfiguration>()
             .Configure<IConfiguration>((settings, configuration) =>
             {
@@ -54,7 +68,7 @@ public class Startup : FunctionsStartup
             });
 
         builder.Services.AddSingleton<ICosmosDbService, CosmosDbService>();
-        
+
 
         builder.Services.AddSingleton<PriceRepository>();
 
