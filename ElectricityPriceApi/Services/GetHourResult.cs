@@ -9,6 +9,7 @@ public class GetHourResult
     public float Price { get; set; }
     public string? PriceUnit { get; set; }
 
+    // Used for XML serializing
     public GetHourResult()
     {
         

@@ -5,6 +5,7 @@ namespace ElectricityPriceApi.Services.Scores;
 
 public class GetScoreResult
 {
+    // Used for XML serializing
     public GetScoreResult()
     {
         
