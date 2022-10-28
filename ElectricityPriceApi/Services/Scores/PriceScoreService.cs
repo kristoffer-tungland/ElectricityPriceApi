@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ElectricityPriceApi.Models;
+﻿using ElectricityPriceApi.Models;
 using ElectricityPriceApi.Services.Prices;
-using ElectricityPriceApi.Services.Scores;
-using Microsoft.Extensions.Options;
 
-namespace ElectricityPriceApi.Services;
+namespace ElectricityPriceApi.Services.Scores;
 
-public class PriceScoreService
+internal class PriceScoreService : IPriceScoreService
 {
     private readonly IPriceService _priceService;
 
-    public PriceScoreService(IOptions<MyConfiguration> myConfiguration,
-        IOptions<MyConfigurationSecrets> myConfigurationSecrets, IPriceService priceService)
+    public PriceScoreService(IPriceService priceService)
     {
         _priceService = priceService;
     }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ElectricityPriceApi.Models;
+﻿using ElectricityPriceApi.Models;
 
 namespace ElectricityPriceApi.Services.Prices;
 
@@ -11,7 +10,7 @@ public class GetHourPricesResult
     public List<HourPrice>? Prices { get; set; }
     
 
-    public string? GetPriceUnit()
+    public string GetPriceUnit()
     {
         return $"{CurrencyUnitName}/{PriceMeasureUnitName}";
     }

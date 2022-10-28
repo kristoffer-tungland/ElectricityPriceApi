@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 // ReSharper disable IdentifierTypo
 // ReSharper disable StringLiteralTypo
+#pragma warning disable CS8618
 
 namespace ElectricityPriceApi.XMLSchemas;
 

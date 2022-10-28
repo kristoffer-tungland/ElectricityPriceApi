@@ -1,6 +1,3 @@
-using System;
-using ElectricityPriceApi.Enums;
-
 namespace ElectricityPriceApi.Extensions;
 
 public static class DateExtensions

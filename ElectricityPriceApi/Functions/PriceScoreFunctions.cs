@@ -1,27 +1,13 @@
-using System;
-using System.Net;
-using System.Threading.Tasks;
-using System.Web.Http;
-using ElectricityPriceApi.Enums;
 using ElectricityPriceApi.Examples;
-using ElectricityPriceApi.Extensions;
-using ElectricityPriceApi.Services;
 using ElectricityPriceApi.Services.Scores;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 
 namespace ElectricityPriceApi.Functions;
 
 public class PriceScoreFunctions
 {
-    private readonly PriceScoreService _priceScoreService;
+    private readonly IPriceScoreService _priceScoreService;
 
-    public PriceScoreFunctions(PriceScoreService priceScoreService)
+    public PriceScoreFunctions(IPriceScoreService priceScoreService)
     {
         _priceScoreService = priceScoreService;
     }

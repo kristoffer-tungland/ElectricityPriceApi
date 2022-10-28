@@ -1,7 +1,4 @@
-﻿using System;
-using ElectricityPriceApi.Enums;
-
-namespace ElectricityPriceApi.Services.Prices;
+﻿namespace ElectricityPriceApi.Services.Prices;
 
 public class GetHourPricesArgs
 {
