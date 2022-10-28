@@ -5,9 +5,9 @@ namespace ElectricityPriceApi.Functions;
 
 public class PriceScoreFunctions
 {
-    private readonly PriceScoreService _priceScoreService;
+    private readonly IPriceScoreService _priceScoreService;
 
-    public PriceScoreFunctions(PriceScoreService priceScoreService)
+    public PriceScoreFunctions(IPriceScoreService priceScoreService)
     {
         _priceScoreService = priceScoreService;
     }

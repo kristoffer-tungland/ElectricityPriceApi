@@ -1,6 +1,4 @@
-﻿using ElectricityPriceApi.Services.Prices;
-
-namespace ElectricityPriceApi.Services;
+﻿namespace ElectricityPriceApi.Services.Prices;
 
 public interface IPriceService
 {

@@ -24,6 +24,7 @@ internal class PriceService : IPriceService
 
     private async Task CalculateExchangeRates(string currency, DateTime date, Area area, GetHourPricesResult getHourPricesResult)
     {
+        //Todo Improve exchange rates to follow the dates for prices, don't use current always!
         var fromCurrency = getHourPricesResult.CurrencyUnitName;
 
         if (fromCurrency == null)
@@ -72,6 +73,7 @@ internal class PriceService : IPriceService
             Today = getHourPricesResult.Prices.GetAverageOnLastDate(),
             Month = getHourPricesResult.Prices.GetAverageOnLastMonth(),
             Last31Days = getHourPricesResult.Prices.GetAverage(),
+            PriceUnit = getHourPricesResult.GetPriceUnit()
         };
     }
 }

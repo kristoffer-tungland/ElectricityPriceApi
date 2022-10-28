@@ -1,5 +1,4 @@
-﻿using ElectricityPriceApi.Services;
-using ElectricityPriceApi.Services.Prices;
+﻿using ElectricityPriceApi.Services.Prices;
 
 namespace ElectricityPriceApi.Functions;
 

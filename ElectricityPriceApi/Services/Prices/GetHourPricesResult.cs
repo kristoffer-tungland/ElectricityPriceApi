@@ -10,7 +10,7 @@ public class GetHourPricesResult
     public List<HourPrice>? Prices { get; set; }
     
 
-    public string? GetPriceUnit()
+    public string GetPriceUnit()
     {
         return $"{CurrencyUnitName}/{PriceMeasureUnitName}";
     }

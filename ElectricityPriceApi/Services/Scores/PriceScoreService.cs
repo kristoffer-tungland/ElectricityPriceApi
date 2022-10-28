@@ -3,12 +3,11 @@ using ElectricityPriceApi.Services.Prices;
 
 namespace ElectricityPriceApi.Services.Scores;
 
-public class PriceScoreService
+internal class PriceScoreService : IPriceScoreService
 {
     private readonly IPriceService _priceService;
 
-    public PriceScoreService(IOptions<MyConfiguration> myConfiguration,
-        IOptions<MyConfigurationSecrets> myConfigurationSecrets, IPriceService priceService)
+    public PriceScoreService(IPriceService priceService)
     {
         _priceService = priceService;
     }
