@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
 using ElectricityPriceApi.Enums;
+using ElectricityPriceApi.Exceptions;
 using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.Models;
 using ElectricityPriceApi.Services.Prices;
@@ -45,25 +46,40 @@ public class EntsoeHttpClient
         var httpClient = _httpClientFactory.CreateClient();
         var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
 
-        httpResponseMessage.EnsureSuccessStatusCode();
+        if (!httpResponseMessage.IsSuccessStatusCode)
+        {
+            throw new FailedToGetDayAheadPricesException(httpResponseMessage);
+        }
 
         var xml = await httpResponseMessage.Content.ReadAsStringAsync();
 
-        xml = RemoveZInDates(xml);
+        Type? serializeToType = null;
 
-        var serializer = new XmlSerializer(typeof(PublicationMarketDocument));
+        if (xml.Contains("</Acknowledgement_MarketDocument>"))
+        {
+            serializeToType = typeof(AcknowledgementMarketDocument);
+        }
+        else
+        {
+            xml = RemoveZInDates(xml);
+            serializeToType = typeof(PublicationMarketDocument);
+        }
+
+        var serializer = new XmlSerializer(serializeToType);
 
         using var reader = new StringReader(xml);
         var objectDeserialize = serializer.Deserialize(reader);
 
-        if (objectDeserialize is not PublicationMarketDocument publicationMarketDocument)
-            throw new InvalidOperationException();
-
-        return new GetHourPricesResult
+        return objectDeserialize switch
         {
-            Prices = publicationMarketDocument.TimeSeries.SelectMany(x => Flatten(x, args.Area)).ToList(),
-            CurrencyUnitName = publicationMarketDocument.TimeSeries.First().CurrencyUnitName,
-            PriceMeasureUnitName = "kWh"
+            PublicationMarketDocument publicationMarketDocument => new GetHourPricesResult
+            {
+                Prices = publicationMarketDocument.TimeSeries.SelectMany(x => Flatten(x, args.Area)).ToList(), 
+                CurrencyUnitName = publicationMarketDocument.TimeSeries.First().CurrencyUnitName, 
+                PriceMeasureUnitName = "kWh"
+            },
+            AcknowledgementMarketDocument acknowledgementMarketDocument => throw new DayAheadPricesNotFoundException(acknowledgementMarketDocument),
+            _ => throw new InvalidOperationException()
         };
     }
 

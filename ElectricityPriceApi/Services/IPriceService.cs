@@ -1,10 +1,9 @@
 ﻿using System.Threading.Tasks;
 using ElectricityPriceApi.Services.Prices;
 
-namespace ElectricityPriceApi.Services
+namespace ElectricityPriceApi.Services;
+
+public interface IPriceService
 {
-    public interface IPriceService
-    {
-        Task<GetHourPricesResult> GetHourPrices(GetHourPricesArgs args);
-    }
+    Task<GetHourPricesResult> GetHourPrices(GetHourPricesArgs args);
 }
