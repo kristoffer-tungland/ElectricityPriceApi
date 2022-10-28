@@ -1,18 +1,5 @@
-﻿using System;
-using System.Net;
-using System.Threading.Tasks;
-using System.Web.Http;
-using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Extensions;
-using ElectricityPriceApi.Services;
+﻿using ElectricityPriceApi.Services;
 using ElectricityPriceApi.Services.Prices;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.WebJobs;
-using Microsoft.Azure.WebJobs.Extensions.Http;
-using Microsoft.Azure.WebJobs.Extensions.OpenApi.Core.Attributes;
-using Microsoft.Extensions.Logging;
-using Microsoft.OpenApi.Models;
 
 namespace ElectricityPriceApi.Functions;
 
@@ -26,7 +13,7 @@ public class PriceFunctions
     }
 
     [FunctionName("Price")]
-    [OpenApiOperation("RunPrice", "name", Description = "Description of the function")]
+    [OpenApiOperation("RunPrice", "name", Description = "Get prices within a date range")]
     [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
     [OpenApiParameter("fromDate", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
     [OpenApiParameter("toDate", In = ParameterLocation.Query, Required = true, Type = typeof(string), Description = "The date and time to get price score for example 2022-01-16")]
@@ -69,15 +56,15 @@ public class PriceFunctions
         }
     }
 
-    [FunctionName("AveragePrice")]
-    [OpenApiOperation("RunPrice", "name", Description = "Description of the function")]
+    [FunctionName("AveragePrices")]
+    [OpenApiOperation("RunAveragePrices", "name", Description = "Get the average price for today, this month and last 31 days")]
     [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
     [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
     [OpenApiParameter("format", In = ParameterLocation.Query, Required = false, Type = typeof(Format), Description = "The format to use json or xml")]
-    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(GetHourPricesResult), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(GetAveragePricesResult), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive")]
     [OpenApiResponseWithBody(HttpStatusCode.NotFound, "application/xml", typeof(string))]
     [OpenApiResponseWithBody(HttpStatusCode.BadRequest, "application/json", typeof(Exception))]
-    public async Task<IActionResult> RunAveragePrice(
+    public async Task<IActionResult> RunAveragePrices(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
         ILogger log)
     {

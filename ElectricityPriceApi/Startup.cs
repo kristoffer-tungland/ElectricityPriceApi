@@ -1,5 +1,4 @@
-﻿using System;
-using System.Buffers;
+﻿using System.Buffers;
 using System.Net.Http.Formatting;
 using System.Reflection;
 using System.Text.Json;
@@ -41,7 +40,6 @@ public class Startup : FunctionsStartup
             })
             .AddXmlDataContractSerializerFormatters().AddXmlSerializerFormatters();
         builder.Services.AddHttpClient();
-        builder.Services.AddTransient<PriceHttpClient>();
         builder.Services.AddTransient<EntsoeHttpClient>();
         builder.Services.AddTransient<NorskeBankHttpClient>();
 

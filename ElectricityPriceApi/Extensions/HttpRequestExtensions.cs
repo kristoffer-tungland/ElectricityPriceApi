@@ -1,7 +1,4 @@
-﻿using System;
-using System.Globalization;
-using ElectricityPriceApi.Enums;
-using Microsoft.AspNetCore.Http;
+﻿using System.Globalization;
 
 namespace ElectricityPriceApi.Extensions;
 

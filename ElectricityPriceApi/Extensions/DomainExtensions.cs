@@ -1,7 +1,4 @@
-﻿using System;
-using ElectricityPriceApi.Enums;
-
-namespace ElectricityPriceApi.Extensions;
+﻿namespace ElectricityPriceApi.Extensions;
 
 public static class DomainExtensions
 {

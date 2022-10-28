@@ -1,5 +1,4 @@
-﻿using System;
-using ElectricityPriceApi.XMLSchemas;
+﻿using ElectricityPriceApi.XMLSchemas;
 
 namespace ElectricityPriceApi.Exceptions;
 

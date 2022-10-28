@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Options;
+﻿using System.Net.Http;
 using Newtonsoft.Json;
 
 namespace ElectricityPriceApi.HttpClients;

@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.Linq;
+﻿using System.Globalization;
 using System.Net.Http;
-using System.Threading.Tasks;
-using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Extensions;
 using Newtonsoft.Json;
 
 namespace ElectricityPriceApi.HttpClients;

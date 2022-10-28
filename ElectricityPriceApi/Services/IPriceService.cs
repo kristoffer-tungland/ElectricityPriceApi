@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using ElectricityPriceApi.Services.Prices;
+﻿using ElectricityPriceApi.Services.Prices;
 
 namespace ElectricityPriceApi.Services;
 

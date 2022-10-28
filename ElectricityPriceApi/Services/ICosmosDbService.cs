@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace ElectricityPriceApi.Services;
+﻿namespace ElectricityPriceApi.Services;
 
 public interface ICosmosDbService
 {

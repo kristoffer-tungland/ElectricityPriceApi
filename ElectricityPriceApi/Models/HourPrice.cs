@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace ElectricityPriceApi.Models;
+﻿namespace ElectricityPriceApi.Models;
 
 public class HourPrice
 {

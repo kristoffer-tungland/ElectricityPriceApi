@@ -1,6 +1,4 @@
-﻿using System;
-using ElectricityPriceApi.Exceptions;
-using Microsoft.AspNetCore.Mvc;
+﻿using ElectricityPriceApi.Exceptions;
 
 namespace ElectricityPriceApi.Extensions;
 

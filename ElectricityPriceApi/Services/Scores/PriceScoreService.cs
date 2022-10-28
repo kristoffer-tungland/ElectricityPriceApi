@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using ElectricityPriceApi.Models;
+﻿using ElectricityPriceApi.Models;
 using ElectricityPriceApi.Services.Prices;
-using Microsoft.Extensions.Options;
 
 namespace ElectricityPriceApi.Services.Scores;
 

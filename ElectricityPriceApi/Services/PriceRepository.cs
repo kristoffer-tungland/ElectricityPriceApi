@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using ElectricityPriceApi.HttpClients;
-
-namespace ElectricityPriceApi.Services;
+﻿namespace ElectricityPriceApi.Services;
 
 public class PriceRepository
 {

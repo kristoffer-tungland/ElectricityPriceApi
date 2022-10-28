@@ -1,8 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
-using ElectricityPriceApi.Enums;
-using ElectricityPriceApi.Extensions;
-using ElectricityPriceApi.HttpClients;
+﻿using ElectricityPriceApi.HttpClients;
 
 namespace ElectricityPriceApi.Services.Prices;
 
@@ -59,7 +55,7 @@ internal class PriceService : IPriceService
 
     public async Task<GetAveragePricesResult?> GetAveragePrices(GetAveragePricesArgs args)
     {
-        var localTime = args.Area.LocalTimeNow();
+        var localTime = args.Area.LocalTimeNow().AddDays(1);
         var end = new DateTime(localTime.Year, localTime.Month, localTime.Day);
         var start = end.AddDays(-31);
         var getHourPricesArgs = new GetHourPricesArgs(args.Area, start, end, args.Currency);
@@ -68,9 +64,14 @@ internal class PriceService : IPriceService
 
         await CalculateExchangeRates(args.Currency, end, args.Area, getHourPricesResult);
 
+        if (getHourPricesResult.Prices is null)
+            throw new NullReferenceException("Prices was not set");
+        
         return new GetAveragePricesResult
         {
-            // TODO Calculate average prices
+            Today = getHourPricesResult.Prices.GetAverageOnLastDate(),
+            Month = getHourPricesResult.Prices.GetAverageOnLastMonth(),
+            Last31Days = getHourPricesResult.Prices.GetAverage(),
         };
     }
 }

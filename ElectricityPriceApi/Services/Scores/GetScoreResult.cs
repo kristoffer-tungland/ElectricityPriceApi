@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using ElectricityPriceApi.Models;
+﻿using ElectricityPriceApi.Models;
 
 namespace ElectricityPriceApi.Services.Scores;
 
