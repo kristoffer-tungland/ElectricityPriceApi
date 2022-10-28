@@ -28,25 +28,21 @@ namespace ElectricityPriceApi.Services.Prices
             if (toCurrency == fromCurrency)
                 return result;
 
-            var nokCurrency = "NOK";
+            const string nokCurrency = "NOK";
 
-            var exchangeRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, fromCurrency, nokCurrency);
+            var exchangeToNokRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, fromCurrency, nokCurrency);
+            var exchangeToNokRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeToNokRateArgs);
 
-            //Todo If currency is not NOK, do another call to get
-
-            var exchangeRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeRateArgs);
-
-            var exchangeRate = exchangeRateResult.Observation;
+            var exchangeRate = exchangeToNokRateResult.ExchangeRate;
 
             if (toCurrency != nokCurrency)
             {
-                var exchangeToNotNokRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, toCurrency, nokCurrency);
-                var exchangeToNotNokRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeToNotNokRateArgs);
+                var exchangeFromNokRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, toCurrency, nokCurrency);
+                var exchangeFromNokRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeFromNokRateArgs);
 
-                // TODO DKK to NOK gets strange results
-                var exchange = 1 / exchangeToNotNokRateResult.Observation;
+                var exchangeFromNok = 1 / exchangeFromNokRateResult.ExchangeRate;
 
-                exchangeRate *= exchange;
+                exchangeRate *= exchangeFromNok;
             }
 
             result.CurrencyUnitName = toCurrency;

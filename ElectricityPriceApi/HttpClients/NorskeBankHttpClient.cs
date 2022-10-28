@@ -36,13 +36,23 @@ public class NorskeBankHttpClient
 
         var json = await httpResponseMessage.Content.ReadAsStringAsync();
 
-        var root = JsonConvert.DeserializeObject<ExchangeRateJson>(json);
-        
+        var deserializeObject = JsonConvert.DeserializeObject<ExchangeRateJson>(json);
+
+        var observation = float.Parse(deserializeObject.data.dataSets.First().series._0000.observations.Last().Value.First(), CultureInfo.InvariantCulture);
+
+        var unitMultiplier = deserializeObject.data.structure.attributes.series.FirstOrDefault(x => x.id.Equals("UNIT_MULT"))?.values.FirstOrDefault()?.id;
+
+        if (int.TryParse(unitMultiplier, out var unitMultiplierResult))
+        {
+            if (unitMultiplierResult > 0)
+                observation /= (float)(Math.Pow(10,unitMultiplierResult));
+        }
+
         var result = new ExchangeRateResult
         {
-            FromCurrency = root.data.structure.dimensions.series.First(x => x.keyPosition == 1).values.First().id,
-            ToCurrency = root.data.structure.dimensions.series.First(x => x.keyPosition == 2).values.First().id,
-            Observation = float.Parse(root.data.dataSets.First().series._0000.observations.Last().Value.First(),CultureInfo.InvariantCulture)
+            FromCurrency = deserializeObject.data.structure.dimensions.series.First(x => x.keyPosition == 1).values.First().id,
+            ToCurrency = deserializeObject.data.structure.dimensions.series.First(x => x.keyPosition == 2).values.First().id,
+            ExchangeRate = observation
         };
         return result;
     }
@@ -70,7 +80,7 @@ public class ExchangeRateResult
 {
     public string? FromCurrency { get; set; }
     public string? ToCurrency { get; set; }
-    public float Observation { get; set; }
+    public float ExchangeRate { get; set; }
 }
 
 // Root myDeserializedClass = JsonConvert.DeserializeObject<Root>(myJsonResponse);
