@@ -6,4 +6,5 @@ namespace ElectricityPriceApi.Services;
 public interface IPriceService
 {
     Task<GetHourPricesResult> GetHourPrices(GetHourPricesArgs args);
+    Task<GetAveragePricesResult?> GetAveragePrices(GetAveragePricesArgs args);
 }

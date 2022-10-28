@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using ElectricityPriceApi.Enums;
+using ElectricityPriceApi.Extensions;
 using ElectricityPriceApi.HttpClients;
 
 namespace ElectricityPriceApi.Services.Prices;
@@ -19,25 +21,31 @@ internal class PriceService : IPriceService
     {
         var getHourPricesResult = await _entsoeHttpClient.GetHourPrices(args);
 
-        var toCurrency = args.Currency;
+        await CalculateExchangeRates(args.Currency, args.PeriodEnd, args.Area, getHourPricesResult);
+
+        return getHourPricesResult;
+    }
+
+    private async Task CalculateExchangeRates(string currency, DateTime date, Area area, GetHourPricesResult getHourPricesResult)
+    {
         var fromCurrency = getHourPricesResult.CurrencyUnitName;
 
         if (fromCurrency == null)
             throw new NullReferenceException("From currency was not set");
 
-        if (toCurrency == fromCurrency)
-            return getHourPricesResult;
+        if (currency == fromCurrency)
+            return;
 
         const string nokCurrency = "NOK";
 
-        var exchangeToNokRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, fromCurrency, nokCurrency);
+        var exchangeToNokRateArgs = new ExchangeRateArgs(date.AddDays(-7), date, area, fromCurrency, nokCurrency);
         var exchangeToNokRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeToNokRateArgs);
 
         var exchangeRate = exchangeToNokRateResult.ExchangeRate;
 
-        if (toCurrency != nokCurrency)
+        if (currency != nokCurrency)
         {
-            var exchangeFromNokRateArgs = new ExchangeRateArgs(args.PeriodEnd.AddDays(-7), args.PeriodEnd, args.Area, toCurrency, nokCurrency);
+            var exchangeFromNokRateArgs = new ExchangeRateArgs(date.AddDays(-7), date, area, currency, nokCurrency);
             var exchangeFromNokRateResult = await _norskeBankHttpClient.GetExchangeRate(exchangeFromNokRateArgs);
 
             var exchangeFromNok = 1 / exchangeFromNokRateResult.ExchangeRate;
@@ -45,9 +53,24 @@ internal class PriceService : IPriceService
             exchangeRate *= exchangeFromNok;
         }
 
-        getHourPricesResult.CurrencyUnitName = toCurrency;
+        getHourPricesResult.CurrencyUnitName = currency;
         getHourPricesResult.Prices?.ForEach(x => x.Price *= exchangeRate);
+    }
 
-        return getHourPricesResult;
+    public async Task<GetAveragePricesResult?> GetAveragePrices(GetAveragePricesArgs args)
+    {
+        var localTime = args.Area.LocalTimeNow();
+        var end = new DateTime(localTime.Year, localTime.Month, localTime.Day);
+        var start = end.AddDays(-31);
+        var getHourPricesArgs = new GetHourPricesArgs(args.Area, start, end, args.Currency);
+
+        var getHourPricesResult = await _entsoeHttpClient.GetHourPrices(getHourPricesArgs);
+
+        await CalculateExchangeRates(args.Currency, end, args.Area, getHourPricesResult);
+
+        return new GetAveragePricesResult
+        {
+            // TODO Calculate average prices
+        };
     }
 }

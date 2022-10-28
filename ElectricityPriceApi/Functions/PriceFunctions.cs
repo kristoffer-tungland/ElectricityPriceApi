@@ -68,4 +68,40 @@ public class PriceFunctions
             return new ExceptionResult(e, true);
         }
     }
+
+    [FunctionName("AveragePrice")]
+    [OpenApiOperation("RunPrice", "name", Description = "Description of the function")]
+    [OpenApiParameter("area", In = ParameterLocation.Query, Required = true, Type = typeof(Area), Description = "Price area code, for example NO2")]
+    [OpenApiParameter("currency", In = ParameterLocation.Query, Required = false, Type = typeof(string), Description = "The currency to use for price")]
+    [OpenApiParameter("format", In = ParameterLocation.Query, Required = false, Type = typeof(Format), Description = "The format to use json or xml")]
+    [OpenApiResponseWithBody(HttpStatusCode.OK, "application/json", typeof(GetHourPricesResult), Description = "Price score for the hour. 1 is cheapest and 24 is most expensive")]
+    [OpenApiResponseWithBody(HttpStatusCode.NotFound, "application/xml", typeof(string))]
+    [OpenApiResponseWithBody(HttpStatusCode.BadRequest, "application/json", typeof(Exception))]
+    public async Task<IActionResult> RunAveragePrice(
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", "post", Route = null)] HttpRequest req,
+        ILogger log)
+    {
+        req.SetAcceptHeadersIfFormatSetToXml();
+
+        if (!req.TryGetAreaParameter(out var area))
+            return new BadRequestErrorMessageResult("Please supply area to request, example area=no2");
+        
+        var currency = req.GetCurrencyParameterOrDefault();
+
+        try
+        {
+            var args = new GetAveragePricesArgs(area, currency);
+            var result = await _priceService.GetAveragePrices(args);
+
+            return new OkObjectResult(result);
+        }
+        catch (Exception e)
+        {
+            if (e.HandleException() is { } actionResult)
+                return actionResult;
+
+            log.LogError(e, "Failed to get price");
+            return new ExceptionResult(e, true);
+        }
+    }
 }

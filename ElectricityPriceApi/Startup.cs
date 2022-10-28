@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using ElectricityPriceApi.Services.Scores;
 
 [assembly: FunctionsStartup(typeof(Startup))]
 

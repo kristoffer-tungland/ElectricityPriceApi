@@ -5,7 +5,6 @@ using System.Web.Http;
 using ElectricityPriceApi.Enums;
 using ElectricityPriceApi.Examples;
 using ElectricityPriceApi.Extensions;
-using ElectricityPriceApi.Services;
 using ElectricityPriceApi.Services.Scores;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;

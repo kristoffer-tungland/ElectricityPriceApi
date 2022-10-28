@@ -1,6 +1,6 @@
 ﻿using ElectricityPriceApi.Models;
 
-namespace ElectricityPriceApi.Services;
+namespace ElectricityPriceApi.Services.Scores;
 
 public class GetHourResult
 {
@@ -12,7 +12,7 @@ public class GetHourResult
     // Used for XML serializing
     public GetHourResult()
     {
-        
+
     }
 
     public GetHourResult(HourPriceScore hourPriceScore, string? priceUnit)

@@ -1,7 +1,7 @@
 ﻿using System;
 using ElectricityPriceApi.Enums;
 
-namespace ElectricityPriceApi.Services;
+namespace ElectricityPriceApi.Services.Scores;
 
 public class GetScoreArgs
 {
