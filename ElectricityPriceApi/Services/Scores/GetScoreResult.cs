@@ -19,8 +19,11 @@ public class GetScoreResult
 
         foreach (var priceScore in pricesWithScore)
         {
-            HourScores.Add($"ScoreOfHour{priceScore.Time.Hour}", priceScore.Score);
-            HourPrices.Add($"PriceOfHour{priceScore.Time.Hour}", priceScore.Price);
+            if (!HourScores.ContainsKey($"ScoreOfHour{priceScore.Time.Hour}"))
+                HourScores.Add($"ScoreOfHour{priceScore.Time.Hour}", priceScore.Score);
+
+            if (!HourPrices.ContainsKey($"PriceOfHour{priceScore.Time.Hour}"))
+                HourPrices.Add($"PriceOfHour{priceScore.Time.Hour}", priceScore.Price);
         }
     }
     
