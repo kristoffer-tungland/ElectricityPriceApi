@@ -70,7 +70,9 @@ internal class PriceService : IPriceService
         
         return new GetAveragePricesResult
         {
-            Today = getHourPricesResult.Prices.GetAverageOnLastDate(),
+            Today = getHourPricesResult.Prices.GetAverageOnLastDay(),
+            Week = getHourPricesResult.Prices.GetAverageOnLastWeek(),
+            Last7Days = getHourPricesResult.Prices.GetAverageOnLast7Days(),
             Month = getHourPricesResult.Prices.GetAverageOnLastMonth(),
             Last31Days = getHourPricesResult.Prices.GetAverage(),
             PriceUnit = getHourPricesResult.GetPriceUnit()
