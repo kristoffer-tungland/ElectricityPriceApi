@@ -1,4 +1,5 @@
 ﻿using ElectricityPriceApi.Models;
+using System.Globalization;
 
 namespace ElectricityPriceApi.Extensions;
 
@@ -16,7 +17,9 @@ public static class HourPricesExtensions
     {
         var date = prices.Last().Time.Date;
 
-        var lastWeek = prices.Where(x => x.Time.Year.Equals(date.Year) && x.Time.Month.Equals(date.Month) && x.Time.Day <= date.Day);
+        var weekNumber = ISOWeek.GetWeekOfYear(date);
+
+        var lastWeek = prices.Where(x => x.Time.Year.Equals(date.Year) && ISOWeek.GetWeekOfYear(x.Time).Equals(weekNumber));
 
         return lastWeek.Select(x => x.Price).Average();
     }
