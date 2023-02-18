@@ -62,6 +62,9 @@ jobs:
         dotnet build --configuration Release -p:Version=${{ steps.version.outputs.version }} --output ./output
         popd
 
+    - name: Build
+      run: dotnet build --no-restore --configuration Release -p:Version=${{ steps.version.outputs.version }} 
+
     - name: Test
       run: dotnet test --no-build --verbosity normal --configuration Release
 
