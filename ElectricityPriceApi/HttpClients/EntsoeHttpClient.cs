@@ -34,7 +34,7 @@ public class EntsoeHttpClient
         var periodEnd = args.PeriodEnd.ConvertTimeToUtc(area);
 
         var httpRequestMessage = new HttpRequestMessage(
-            HttpMethod.Get, $"https://transparency.entsoe.eu/api?documentType=A44&in_Domain={inDomain}&out_Domain={outDomain}&periodStart={periodStart.ToString(Format)}&periodEnd={periodEnd.ToString(Format)}&securityToken={_apiKey}");
+            HttpMethod.Get, $"https://web-api.tp.entsoe.eu/api?documentType=A44&in_Domain={inDomain}&out_Domain={outDomain}&periodStart={periodStart.ToString(Format)}&periodEnd={periodEnd.ToString(Format)}&securityToken={_apiKey}");
 
         var httpClient = _httpClientFactory.CreateClient();
         var httpResponseMessage = await httpClient.SendAsync(httpRequestMessage);
